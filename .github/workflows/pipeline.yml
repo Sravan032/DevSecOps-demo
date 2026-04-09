@@ -35,3 +35,8 @@ jobs:
     # Build Docker Image
     - name: Build Docker Image
       run: docker build -t devsecops-demo .
+
+    - name: Run Snyk Test
+    uses: snyk/actions/node@master
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
