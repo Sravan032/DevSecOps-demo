@@ -1,8 +1,15 @@
 name: DevSecOps Pipeline
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+  security-events: write
+
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -25,17 +32,18 @@ jobs:
 
     # SAST - CodeQL
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: javascript
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+      uses: github/codeql-action/analyze@v3
 
     # Build Docker Image
     - name: Build Docker Image
       run: docker build -t devsecops-demo .
 
+    # Snyk scan
     - name: Run Snyk Test
       uses: snyk/actions/node@master
       env:
