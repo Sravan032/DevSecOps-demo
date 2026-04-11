@@ -23,7 +23,7 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    # Dependency Scanning (Basic)
+    # Dependency Scanning
     - name: npm audit scan
       run: npm audit --audit-level=high
 
@@ -39,25 +39,31 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
 
-    # SNYK SCAN (Advanced Dependency + SAST)
+    # Snyk Scan
     - name: Snyk Security Scan
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-    # Docker Build
+    # Build Docker Image
     - name: Build Docker Image
       run: docker build -t devsecops-app .
 
-    # Container Security - Trivy
-    - name: Scan with Trivy
-      uses: aquasecurity/trivy-action@v0
-      with:
-        image-ref: devsecops-app
-        severity: HIGH,CRITICAL
-        format: table
+    # Install Trivy (CLI)
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install -y trivy
 
-    # Run App for DAST
+    # Scan Docker Image
+    - name: Scan with Trivy
+      run: trivy image --severity HIGH,CRITICAL devsecops-app
+
+    # Run App
     - name: Start App
       run: |
         docker run -d -p 5000:5000 devsecops-app
