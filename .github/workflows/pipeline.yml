@@ -42,7 +42,7 @@ jobs:
 
     # Container Security - Trivy
     - name: Scan with Trivy
-      uses: aquasecurity/trivy-action@0.19.0
+      uses: aquasecurity/trivy-action@v0.19.0
       with:
         image-ref: devsecops-app
         severity: HIGH,CRITICAL
